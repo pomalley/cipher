@@ -47,7 +47,7 @@ def guess_word(cipher, word):
 
     Returns a list of possibilities, in order of the location of the word.
     For example, if the word fits starting at position 0, or at position 10,
-    the first item in the list will correpond to the word substituted at 0,
+    the first item in the list will correspond to the word substituted at 0,
     and the second at 10.
 
     Args:
@@ -59,8 +59,13 @@ def guess_word(cipher, word):
             guessed plaintext, with the substitutions defined by the word.
             Second is the substitution key.
     """
+    poss = []
     for i in range(len(cipher)):
         key = place_word(cipher, word, i)
+        if not key:
+            continue
+        poss.append((substitute(cipher, key), key))
+    return poss
 
 
 def place_word(cipher, word, i):
