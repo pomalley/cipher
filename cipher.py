@@ -1,5 +1,24 @@
 """Simple substitution cipher stuff."""
 
+text_full = 'VJ AM LAP AS PCX IS WSAQMM OV JAS PHI V LIV JAM GVAQV JUD JT ' \
+              'AV JAH SPUD JT VIV LAV JET JMF'
+text = text_full.replace(' ', '')
+
+
+def sorted_frequency_count(cipher):
+    """Return a sorted list of letter counts.
+
+    Args:
+        cipher (str): ciphertext string
+
+    Returns:
+        list[(str, int)]: list of (character, count)
+    """
+    freqs = frequency_count(cipher)
+    l = freqs.keys()
+    l.sort(key=lambda c: -freqs[c])
+    return [(char, freqs[char]) for char in l]
+
 
 def frequency_count(cipher):
     """Get a basic frequency count.
@@ -60,7 +79,7 @@ def guess_word(cipher, word):
             Second is the substitution key.
     """
     poss = []
-    for i in range(len(cipher)):
+    for i in range(len(cipher) - len(word) + 1):
         key = place_word(cipher, word, i)
         if not key:
             continue
@@ -84,15 +103,14 @@ def place_word(cipher, word, i):
     for j in range(len(word)):
         plain_char = word[j]
         cipher_char = cipher[i+j]
-        if cipher_char in key:
-            if key[cipher_char] != plain_char:
-                # we fail because this cipher character is already required
-                # to be another plain character
-                return {}
-            elif plain_char in key.values():
-                # we fail because this plain character is already required to
-                #  be represented by another cipher character
-                return {}
+        if cipher_char in key and key[cipher_char] != plain_char:
+            # we fail because this cipher character is already required
+            # to be another plain character
+            return {}
+        elif cipher_char not in key and plain_char in key.values():
+            # we fail because this plain character is already required to
+            # be represented by another cipher character
+            return {}
         else:
             key[cipher_char] = plain_char
     return key
