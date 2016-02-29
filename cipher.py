@@ -1,8 +1,7 @@
 """Simple substitution cipher stuff."""
 
-text_full = 'VJ AM LAP AS PCX IS WSAQMM OV JAS PHI V LIV JAM GVAQV JUD JT ' \
-              'AV JAH SPUD JT VIV LAV JET JMF'
-text = text_full.replace(' ', '')
+
+alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 
 def sorted_frequency_count(cipher):
@@ -33,6 +32,22 @@ def frequency_count(cipher):
     for char in cipher:
         freqs[char] = freqs.get(char, 0) + 1
     return freqs
+
+
+def key_caesar(shift, letters=alphabet):
+    """Generate a key for a Caesar cipher.
+
+    Args:
+        shift (int): the amount to shift by. Negative is OK.
+        letters (iterable[str]): list of letters to use. default: the alphabet.
+
+    Returns:
+        dic[str, str]: the key
+    """
+    key = {}
+    for i, l in enumerate(letters):
+        key[l] = letters[(i + shift) % len(letters)]
+    return key
 
 
 def substitute(cipher, key, filler='_'):
@@ -116,4 +131,33 @@ def place_word(cipher, word, i):
     return key
 
 if __name__ == '__main__':
-    pass
+    # let's work through a cipher as an example.
+    # The original ciphertext:
+    text_full = 'VJ AM LAP AS PCX IS WSAQMM OV JAS PHI V LIV JAM GVAQV JUD JT' \
+                ' AV JAH SPUD JT VIV LAV JET JMF'
+    # The solitary V must be either A or I (or possibly O) in standard English.
+    # However, VIV rules out those possibilities. Therefore, the spaces are
+    # probably a red herring. Let's remove them.
+    text = text_full.replace(' ', '')
+    print sorted_frequency_count(text)
+    # We can guess a couple of words, but they don't really help
+    print
+    print '\n'.join(x[0] for x in guess_word(text, 'THE'))
+    print
+    # What if we treat the vowels as spaces?
+    text_spaced = text.replace('A', ' ').replace('I', ' ').replace('E', ' ')
+    text_spaced = text_spaced.replace('O', ' ').replace('U', ' ')
+    print text_spaced
+    # Similarly, let's guess the words now have the vowels stripped.
+    # Turns out the first one is pretty good
+    print guess_word(text_spaced, 'TH')[0]
+    # Maybe we have a Ceasar cipher?
+    print substitute(text_spaced, key_caesar(-2))
+    # What if it's only a Caesar on the consonants?
+    consonants = alphabet.replace('A', '').replace('E', '').replace('I', '')
+    consonants = consonants.replace('O', '').replace('U', '')
+    print substitute(text_spaced, key_caesar(-1, consonants))
+    # Bingo!
+    print "THE LAKE IN RAINBOW RIVER PULL THE RING TAKE THE LEFT PATH CHOOSE " \
+          "THE GREEN CHEST TAKE THE SHIELD"
+
